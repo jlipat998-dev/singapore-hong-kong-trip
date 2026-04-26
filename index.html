@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сингапур — программа тура</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0ede6;
+    color: #1a1a1a;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+  }
+
+  header {
+    margin-bottom: 24px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #1a1a1a;
+  }
+  header p {
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+  }
+
+  .day-card {
+    background: #fff;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+  }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #f0ede6;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .day-header:active { background: #faf9f6; }
+
+  .day-left { display: flex; align-items: center; gap: 12px; }
+  .day-emoji { font-size: 22px; line-height: 1; }
+  .day-info {}
+  .day-date { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+  .day-label { font-size: 12px; color: #999; margin-top: 1px; }
+
+  .day-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-guide  { background: #eeecfd; color: #4a3faa; }
+  .badge-self   { background: #e2f5ee; color: #0a6646; }
+  .badge-tbd    { background: #fef0d8; color: #8a5500; }
+  .badge-hotel  { background: #e5f0fb; color: #1558a0; }
+  .badge-warn   { background: #fff3cd; color: #856404; }
+
+  .chevron {
+    font-size: 18px;
+    color: #bbb;
+    margin-left: 8px;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+    display: inline-block;
+  }
+
+  .day-body {
+    padding: 0 16px 16px;
+  }
+
+  .hotel-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0ede6;
+    font-size: 13px;
+    color: #888;
+  }
+  .hotel-row span { font-weight: 600; }
+
+  .activity-list { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .activity-time {
+    flex-shrink: 0;
+    min-width: 44px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #4a3faa;
+    background: #eeecfd;
+    padding: 3px 6px;
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 1px;
+  }
+  .activity-time.no-time {
+    background: transparent;
+    color: transparent;
+    pointer-events: none;
+  }
+  .activity-content { flex: 1; }
+  .activity-title { font-size: 14px; font-weight: 600; color: #1a1a1a; line-height: 1.35; }
+  .activity-desc { font-size: 12.5px; color: #666; margin-top: 3px; line-height: 1.45; }
+
+  .map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #1558a0;
+    text-decoration: none;
+    background: #e5f0fb;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+    font-weight: 500;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .map-link:active { background: #c5dcf5; }
+
+  .notes-box {
+    margin-top: 14px;
+    background: #faf9f6;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .note-item { font-size: 12px; color: #666; line-height: 1.4; }
+  .note-item.warn { color: #b87700; }
+  .note-item.ok { color: #0a6646; }
+
+  .divider { height: 1px; background: #f0ede6; margin: 12px 0; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 0 2px;
+  }
+  .legend-title { font-size: 11px; color: #aaa; width: 100%; text-transform: uppercase; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🇸🇬🇭🇰 Сингапур + Гонконг</h1>
+  <p>Программа тура · апрель–май 2025</p>
+</header>
+
+<!-- 25 апреля — напоминание -->
+<div class="day-card" id="day0">
+  <div class="day-header" onclick="toggle('day0')">
+    <div class="day-left">
+      <div class="day-emoji">📋</div>
+      <div class="day-info">
+        <div class="day-date">25 апреля · Пт</div>
+        <div class="day-label">До вылета — важное напоминание</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge" style="background:#fde8e8;color:#a32d2d;">Обязательно</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">📋 Singapore Arrival Card</div>
+          <div class="activity-desc">Обязательная миграционная карта для въезда в Сингапур. Заполняется онлайн за 1–3 дня до въезда — то есть с 25 по 27 апреля. Заполнять отдельно на каждого участника группы.</div>
+          <a class="map-link" href="https://eservices.ica.gov.sg/sgarrivalcard/fvipa" target="_blank" style="background:#fde8e8;color:#a32d2d;">🔗 Заполнить Arrival Card</a>
+        </div>
+      </div>
+    </div>
+    <div class="notes-box">
+      <div class="note-item warn">⚠️ Без заполненной карты могут не пустить на борт самолёта</div>
+      <div class="note-item">👤 Заполнять отдельно на каждого члена группы</div>
+      <div class="note-item">🕐 Открывается не раньше чем за 3 дня до въезда</div>
+    </div>
+  </div>
+</div>
+
+<!-- 28 апреля -->
+<div class="day-card open" id="day1">
+  <div class="day-header" onclick="toggle('day1')">
+    <div class="day-left">
+      <div class="day-emoji">✈️</div>
+      <div class="day-info">
+        <div class="day-date">28 апреля · Пн</div>
+        <div class="day-label">Прилёт + вечер в Marina Bay</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-self">Самост.</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Отель: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">✈️ Прилёт в Сингапур</div>
+          <div class="activity-desc">Прогулка по Changi / Jewel. Заселение в отель, отдых, переодевание.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="activity-item">
+        <div class="activity-time">16:20</div>
+        <div class="activity-content">
+          <div class="activity-title">🚤 Singapore River Cruise</div>
+          <div class="activity-desc">Старт с Clarke Quay Jetty. ~40 мин. Прибытие обратно в 17:00. Проплываете мимо Merlion Park, Esplanade, Marina Bay Sands. S$28.</div>
+          <div style="margin-top:8px;background:#fff3cd;border-radius:10px;padding:8px 10px;font-size:12px;color:#856404;line-height:1.6;">
+            ⏰ <strong>Напоминание:</strong> Забронировать билеты онлайн заранее, чтобы гарантировать место на время 16:20
+          </div>
+          <a class="map-link" href="https://maps.google.com/?cid=12130463556720709402" target="_blank">📍 Google Maps</a>
+          <a class="map-link" href="https://rivercruise.com.sg/river-cruise/" target="_blank" style="background:#fff3cd;color:#856404;">🎫 Забронировать билеты</a>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-time">17:00</div>
+        <div class="activity-content">
+          <div class="activity-title">🚶 Пешком до Marina Bay Sands</div>
+          <div class="activity-desc">~20 мин вдоль набережной от Clarke Quay до башни 3 MBS. Или такси ~5 мин.</div>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-time">18:15</div>
+        <div class="activity-content">
+          <div class="activity-title">🍹 Ce La Vi Sky Bar</div>
+          <div class="activity-desc">57-й этаж Marina Bay Sands. ~1,5 часа. Вход S$38 включает коктейль. Закат над заливом.</div>
+          <div style="margin-top:8px;background:#e2f5ee;border-radius:10px;padding:8px 10px;font-size:12px;color:#0a6646;line-height:1.6;">
+            ✅ <strong>Бронь подтверждена</strong><br>
+            Юлия Липатова · 2 гостя · 18:15<br>
+            Мин. расход S$50 на гостя
+          </div>
+          <div style="margin-top:8px;">
+            <img src="celavi_reservation_confirmation.png" alt="Ce La Vi Reservation Confirmation" style="width:100%;max-width:300px;border-radius:8px;border:1px solid #ddd;">
+          </div>
+          <a class="map-link" href="https://maps.google.com/?cid=3779410844655052134" target="_blank">📍 Google Maps</a>
+          <a class="map-link" href="https://www.sevenrooms.com/reservations/celavisingapore" target="_blank" style="background:#e2f5ee;color:#0a6646;">📋 Управление бронью</a>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-time">20:00</div>
+        <div class="activity-content">
+          <div class="activity-title">💡 Spectra — световое шоу</div>
+          <div class="activity-desc">Event Plaza, Marina Bay Sands. ~15 мин. Бесплатно. Смотреть с набережной у воды.</div>
+          <a class="map-link" href="https://maps.google.com/?cid=18140855304747212513" target="_blank">📍 Google Maps</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item ok">✅ Ce La Vi — бронь подтверждена на 18:15, 2 гостя</div>
+      <div class="note-item warn">⚠️ Купить билет на круиз онлайн заранее</div>
+      <div class="note-item">👗 Dress code в баре: smart casual</div>
+      <div class="note-item">🚶 Все три точки пешком вдоль набережной</div>
+      <div class="note-item">💡 Другие шоу: Сады 19:45/20:45 · Залив 20:00/21:00</div>
+    </div>
+  </div>
+</div>
+
+<!-- 29 апреля -->
+<div class="day-card" id="day2">
+  <div class="day-header" onclick="toggle('day2')">
+    <div class="day-left">
+      <div class="day-emoji">🌿</div>
+      <div class="day-info">
+        <div class="day-date">29 апреля · Вт</div>
+        <div class="day-label">Сады Сингапура</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-guide">Маргарита</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Отель: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🌿 Gardens by the Bay</div>
+          <div class="activity-desc">Экскурсия с Маргаритой. Supertree Grove, Cloud Forest, Flower Dome.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time">19:45</div>
+        <div class="activity-content">
+          <div class="activity-title">💡 Garden Rhapsody</div>
+          <div class="activity-desc">Световое шоу у Supertrees. Второй показ в 20:45.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item ok">✅ Экскурсия подтверждена с Маргаритой</div>
+      <div class="note-item ok">🌿 Тур «Город-сад» · Sense Travel</div>
+      <a class="map-link" href="https://sensetravel.sg/tours/future" target="_blank" style="background:#e2f5ee;color:#0a6646;margin-top:6px;">🔗 Sense Travel</a>
+    </div>
+  </div>
+</div>
+
+<!-- 30 апреля -->
+<div class="day-card" id="day3">
+  <div class="day-header" onclick="toggle('day3')">
+    <div class="day-left">
+      <div class="day-emoji">🎂</div>
+      <div class="day-info">
+        <div class="day-date">30 апреля · Ср</div>
+        <div class="day-label">День рождения в зоопарке!</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-self">Самост.</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Отель: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time">9:30</div>
+        <div class="activity-content">
+          <div class="activity-title">🐵 Завтрак с орангутанами</div>
+          <div class="activity-desc">Singapore Zoo — уникальная возможность позавтракать рядом с орангутанами! Идеальное начало дня рождения.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time">10:30</div>
+        <div class="activity-content">
+          <div class="activity-title">🦁 Singapore Zoo</div>
+          <div class="activity-desc">Один из лучших зоопарков мира. Животные в естественной среде без клеток. Слоны, белые тигры, жирафы, приматы.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time">14:00</div>
+        <div class="activity-content">
+          <div class="activity-title">🐼 River Wonders</div>
+          <div class="activity-desc">Речной сафари — гигантские панды, амазонские ламантины, крокодилы. Поездка на лодке по «рекам мира».</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time">19:30</div>
+        <div class="activity-content">
+          <div class="activity-title">🌙 Night Safari</div>
+          <div class="activity-desc">Единственный в мире ночной сафари! Животные активны после заката. Трамвай по 7 зонам + пешеходные тропы.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time">22:00</div>
+        <div class="activity-content">
+          <div class="activity-title">🎂 Ужин на день рождения</div>
+          <div class="activity-desc">Празднование в ресторане — выбрать место недалеко от Mandai или в центре города.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item" style="color:#e24b4a;font-weight:600;">🎉 День рождения! Целый день в дикой природе</div>
+      <div class="note-item ok">🎫 Комби-билет Zoo + River + Night Safari ~S$79</div>
+      <div class="note-item">🐵 Завтрак с орангутанами: S$45/взр (бронь обязательна)</div>
+      <div class="note-item">🚌 Все парки в районе Mandai — шаттлы между ними</div>
+      <div class="note-item">🎂 Забронировать ресторан на ужин заранее</div>
+    </div>
+  </div>
+</div>
+
+<!-- 1 мая -->
+<div class="day-card" id="day4">
+  <div class="day-header" onclick="toggle('day4')">
+    <div class="day-left">
+      <div class="day-emoji">🕌</div>
+      <div class="day-info">
+        <div class="day-date">1 мая · Чт</div>
+        <div class="day-label">Культурный Сингапур</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-guide">Маргарита</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Отель: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🕌 Культурный Сингапур</div>
+          <div class="activity-desc">Chinatown, Little India, Kampong Glam (Arab Street), Colonial District.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🌺 Singapore Botanic Gardens</div>
+          <div class="activity-desc">Ботанический сад — объект ЮНЕСКО. Вход бесплатный.</div>
+          <a class="map-link" href="https://maps.google.com/?cid=13301983069744775146" target="_blank">📍 Google Maps</a>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🌸 National Orchid Garden</div>
+          <div class="activity-desc">Сад орхидей внутри ботанического. Крупнейшая коллекция орхидей в мире. Вход S$15.</div>
+          <a class="map-link" href="https://maps.google.com/?cid=7228264879039349162" target="_blank">📍 Google Maps</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item ok">✅ Экскурсия подтверждена с Маргаритой</div>
+      <div class="note-item ok">🕌 Тур «Культурный Сингапур» · Sense Travel</div>
+      <div class="note-item warn">⚠️ 1 мая — праздник, уточнить часы объектов</div>
+      <div class="note-item">🕗 Orchid Garden: 8:30–19:00 · S$15 взрослый</div>
+      <a class="map-link" href="https://sensetravel.sg/tours/future" target="_blank" style="background:#e2f5ee;color:#0a6646;margin-top:6px;">🔗 Sense Travel</a>
+    </div>
+  </div>
+</div>
+
+<!-- 2 мая -->
+<div class="day-card" id="day5">
+  <div class="day-header" onclick="toggle('day5')">
+    <div class="day-left">
+      <div class="day-emoji">🛫</div>
+      <div class="day-info">
+        <div class="day-date">2 мая · Пт</div>
+        <div class="day-label">Прилёт в Гонконг + вечерняя экскурсия</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-guide">Анна</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Гонконг: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time">14:00</div>
+        <div class="activity-content">
+          <div class="activity-title">✈️ Прилёт в Гонконг</div>
+          <div class="activity-desc">Гонконг International Airport. Паспортный контроль, получение багажа, трансфер в отель.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🏨 Заселение в отель</div>
+          <div class="activity-desc">Быстрое заселение, отдых после перелёта, подготовка к вечерней экскурсии.</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="activity-item">
+        <div class="activity-time">17:00</div>
+        <div class="activity-content">
+          <div class="activity-title">🌆 Вечерняя экскурсия по Гонконгу</div>
+          <div class="activity-desc">Знакомство с городом: основные достопримечательности, панорамы, ночные огни Гонконга.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item ok">✅ Прилёт: 14:00 в Гонконг</div>
+      <div class="note-item ok">✅ Вечерняя экскурсия: 17:00 с Анной (Oro Travel)</div>
+      <div class="note-item ok">📞 Анна: +852 5986 5465</div>
+      <div class="note-item">🕐 3 часа на трансфер + заселение — комфортно</div>
+      <div class="note-item">🏨 Забронировать отель недалеко от центра</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 мая -->
+<div class="day-card" id="day6">
+  <div class="day-header" onclick="toggle('day6')">
+    <div class="day-left">
+      <div class="day-emoji">🎰</div>
+      <div class="day-info">
+        <div class="day-date">3 мая · Сб</div>
+        <div class="day-label">Макао — город азартных игр</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-guide">Виктор</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Гонконг: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🚢 Поездка в Макао</div>
+          <div class="activity-desc">Из Гонконга на скоростном пароме (~1 час) или по мосту Гонконг-Чжухай-Макао.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🎰 Исторический центр Макао</div>
+          <div class="activity-desc">UNESCO World Heritage: руины собора Св. Павла, площадь Сенаду, крепость Монте, португальская архитектура.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🏛️ Казино и отели</div>
+          <div class="activity-desc">Venetian Macao, Galaxy, Wynn — осмотр архитектуры и атмосферы (по желанию).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item ok">✅ Гид: Виктор · Тел: +852 6202 0872</div>
+      <div class="note-item ok">💰 Оплата на месте: $806</div>
+      <div class="note-item">🛂 Макао безвизово для РФ (30 дней)</div>
+      <div class="note-item">🚢 Забронировать паром заранее в выходные</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 мая -->
+<div class="day-card" id="day7">
+  <div class="day-header" onclick="toggle('day7')">
+    <div class="day-left">
+      <div class="day-emoji">🗿</div>
+      <div class="day-info">
+        <div class="day-date">4 мая · Вс</div>
+        <div class="day-label">Остров Лантау</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-guide">Анна</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Гонконг: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🚡 Канатная дорога Ngong Ping 360</div>
+          <div class="activity-desc">Живописная поездка над заливом и горами к монастырю По Лин (~25 минут в кабинке).</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🗿 Большой Будда (Tian Tan Buddha)</div>
+          <div class="activity-desc">Гигантская бронзовая статуя 34 м высотой. Подъём по 268 ступеням к основанию.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🏛️ Монастырь По Лин</div>
+          <div class="activity-desc">Буддийский монастырь, основан в 1906 году. Храмы, статуи, вегетарианский ресторан.</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🏘️ Деревня Тай О</div>
+          <div class="activity-desc">«Венеция Гонконга» — рыбацкая деревня на сваях, традиционные дома, местные деликатесы.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item ok">✅ Гид: Анна (Oro Travel)</div>
+      <div class="note-item ok">📞 Тел/WhatsApp: +852 5986 5465</div>
+      <div class="note-item">🕐 Уточнить время начала экскурсии</div>
+      <div class="note-item">💰 Уточнить стоимость</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 мая -->
+<div class="day-card" id="day8">
+  <div class="day-header" onclick="toggle('day8')">
+    <div class="day-left">
+      <div class="day-emoji">🏙️</div>
+      <div class="day-info">
+        <div class="day-date">5 мая · Пн</div>
+        <div class="day-label">Гонконг — программа TBD</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span class="badge badge-tbd">Планируем</span>
+      <span class="chevron">⌄</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="hotel-row">🏨 Гонконг: <span class="badge badge-hotel">TBD</span></div>
+
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-time no-time">—</div>
+        <div class="activity-content">
+          <div class="activity-title">🏙️ Программа в Гонконге</div>
+          <div class="activity-desc">Заполнить активности...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-box">
+      <div class="note-item warn">⚠️ Планируем программу</div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#fff;border-radius:16px;margin-bottom:16px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.07);border-left:4px solid #e24b4a;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <span style="font-size:22px;">📋</span>
+    <div>
+      <div style="font-size:15px;font-weight:700;color:#1a1a1a;">Singapore Arrival Card</div>
+      <div style="font-size:12px;color:#999;margin-top:1px;">Обязательно для всех путешественников</div>
+    </div>
+  </div>
+  <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:12px;">
+    Заполните онлайн за <strong>1–3 дня до въезда</strong> в Сингапур. Это обязательная миграционная карта — без неё не пустят на борт или на паспортный контроль.
+  </div>
+  <a href="https://eservices.ica.gov.sg/sgarrivalcard/fvipa" target="_blank"
+     style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:#e24b4a;padding:10px 18px;border-radius:10px;text-decoration:none;">
+    🔗 Заполнить Arrival Card
+  </a>
+  <div style="font-size:11px;color:#999;margin-top:10px;">
+    Заполнять отдельно на каждого члена группы · Сайт ICA (Immigration &amp; Checkpoints Authority of Singapore)
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-title">Обозначения</div>
+  <span class="badge badge-guide">Гид: подтверждено</span>
+  <span class="badge badge-tbd">Гид: нужно найти</span>
+  <span class="badge badge-self">Самостоятельно</span>
+  <span class="badge badge-hotel">Отель: заполнить</span>
+</div>
+
+<script>
+  function toggle(id) {
+    const card = document.getElementById(id);
+    const body = card.querySelector('.day-body');
+    const chevron = card.querySelector('.chevron');
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const allCards = document.querySelectorAll('.day-card');
+    allCards.forEach(function(card) {
+      const body = card.querySelector('.day-body');
+      const chevron = card.querySelector('.chevron');
+      if (card.id === 'day1') {
+        body.style.display = 'block';
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        body.style.display = 'none';
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  });
+</script>
+</body>
+</html>
